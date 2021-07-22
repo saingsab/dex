@@ -6,4 +6,8 @@ contract Bat is ERC20 {
   constructor() ERC20("BAT Token", "BAT") public {
           _mint(msg.sender, 3149592654 * (10**uint256(decimals())));
       }
+
+      function faucet(address to, uint amount) external {
+    _mint(to, amount);
+  }
 }
