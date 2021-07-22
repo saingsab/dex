@@ -5,6 +5,11 @@ const Rep = artifacts.require('mocks/Rep.sol');
 const Zrx = artifacts.require('mocks/Zrx.sol');
 const Dex = artifacts.require('Dex.sol');
 
+const SIDE = {
+  BUY: 0,
+  SELL: 1
+};
+
 contract('Dex', (accounts) => {
   let dai, bat, rep, zrx, dex;
   const [trader1, trader2] = [accounts[1], accounts[2]];
@@ -117,5 +122,27 @@ contract('Dex', (accounts) => {
       ),
       'balance too low'
     )
-  })
+  });
+  it('it should create limit order', async () => {
+    dex.deposit(
+      web3.utils.toWei('100'),
+      DAI,
+      {from: trader1}
+    );
+    await dex.createLimitOrder(
+      REP,
+      web3.utils.toWei('10'),
+      10,
+      SIDE.BUY,
+      {from: trader1}
+    );
+    const buyOrders = await dex.getOrders(REP, SIDE.BUY);
+    const sellOrders = await dex.getOrders(REP, SIDE.SELL);
+    assert(buyOrders.length === 1);
+    assert(buyOrders[0].trader === trader1);
+    assert(buyOrders[0].ticker === web3.utils.padRight(REP, 64));
+    assert(buyOrders[0].price === '10');
+    assert(buyOrders[0].amount === web3.utils.toWei('10'));
+    assert(sellOrders.length === 0);
+  });
 });
